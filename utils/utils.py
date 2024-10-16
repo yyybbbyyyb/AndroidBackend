@@ -30,32 +30,31 @@ def custom_exception_handler(exc, context):
         response.data = {
             "status": "error",
             "message": "身份认证失败，请提供有效的认证信息。",
-            "code": "AUTH_UNAUTHORIZED"
+            "errors": response.data
         }
     elif response.status_code == status.HTTP_400_BAD_REQUEST:
         response.data = {
             "status": "error",
             "message": "请求参数无效。",
-            "code": "BAD_REQUEST",
             "errors": response.data
         }
     elif response.status_code == status.HTTP_403_FORBIDDEN:
         response.data = {
             "status": "error",
             "message": "权限不足。",
-            "code": "FORBIDDEN"
+            "errors": response.data
         }
     elif response.status_code == status.HTTP_404_NOT_FOUND:
         response.data = {
             "status": "error",
             "message": "资源未找到。",
-            "code": "NOT_FOUND"
+            "errors": response.data
         }
     else:
         response.data = {
             "status": "error",
             "message": "未知错误，请联系管理员。",
-            "code": "UNKNOWN_ERROR"
+            "errors": response.data
         }
 
     return response

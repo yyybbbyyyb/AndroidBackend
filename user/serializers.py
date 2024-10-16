@@ -2,6 +2,7 @@ from lib2to3.fixes.fix_input import context
 
 from rest_framework import serializers
 from .models import User
+from django.utils import timezone
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -16,10 +17,13 @@ class UserSerializer(serializers.ModelSerializer):
             avatar_url = self.context['request'].build_absolute_uri(instance.avatar.url)
         else:
             if instance.gender == 'M':
-                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_mail.svg')
+                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_mail.png')
             else:
-                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_femail.svg')
+                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_femail.png')
         representation['avatar'] = avatar_url
+
+        # 计算用户使用天数
+        representation['used_days'] = (timezone.now() - instance.date_joined).days
 
         return representation
 
