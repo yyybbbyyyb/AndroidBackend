@@ -5,4 +5,5 @@ djangorestframework-simplejwt==5.3.1
 pillow==10.4.0
 PyJWT==2.9.0
 PyMySQL==1.1.1
+PyYAML==6.0.2
 sqlparse==0.5.1
