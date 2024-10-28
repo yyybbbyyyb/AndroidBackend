@@ -22,6 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),  # 管理后台
     path('api/', include('user.urls')),  # 将所有用户相关的API放到/api/user/下
     path('api/', include('bill.urls')),  # 将所有账单相关的API放到/api/bill/下
+    path('api/', include('ai.urls')),  # 将所有AI相关的API放到/api/ai/下
 ]
 
 if settings.DEBUG:

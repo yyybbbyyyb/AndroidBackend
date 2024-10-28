@@ -48,6 +48,9 @@ class BillSerializer(serializers.ModelSerializer):
             'inOutType': instance.category.inOutType,
             'detail_type': instance.category.detail_type
         }
+
+        # 返回时添加 ledger 的详细信息
+        representation['ledger_name'] = instance.ledger.name
         return representation
 
 class BudgetSerializer(serializers.ModelSerializer):

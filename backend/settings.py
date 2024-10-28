@@ -49,7 +49,8 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
 
     'user',
-    'bill'
+    'bill',
+    'ai'
 ]
 
 MIDDLEWARE = [
@@ -166,3 +167,8 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+from openai import OpenAI
+
+OPENAI_API_KEY = config['openai']['api_key']
+OPENAI_BASE_URL = config['openai']['base_url']

@@ -1,7 +1,6 @@
-from calendar import month
-
 import django_filters
 
+from datetime import datetime
 from .models import Bill, Ledger, Budget, Category
 from .serializers import BillSerializer, LedgerSerializer, BudgetSerializer
 from django.db.models import Sum
@@ -80,7 +79,10 @@ def bill_list(request):
     if request.method == 'GET':
         ledger_id = request.query_params.get('ledger_id')
 
-        bills = Bill.objects.filter(ledger__user=request.user, ledger_id=ledger_id)
+        if not ledger_id:
+            bills = Bill.objects.filter(ledger__user=request.user)
+        else:
+            bills = Bill.objects.filter(ledger__user=request.user, ledger_id=ledger_id)
 
         # 过滤
         filterset = BillFilter(request.GET, queryset=bills)
@@ -255,10 +257,9 @@ def monthly_report(request):
 def daily_report(request):
     month = request.query_params.get('month')
     year = request.query_params.get('year')
-    day = request.query_params.get('day')
     ledger_id = request.query_params.get('ledger_id')
 
-    if not all([month, year, day, ledger_id]):
+    if not all([month, year, ledger_id]):
         return fail_response(message="参数不完整", status_code=status.HTTP_400_BAD_REQUEST)
 
     try:
@@ -266,29 +267,44 @@ def daily_report(request):
     except Ledger.DoesNotExist:
         return fail_response(message="账本不存在或无权限访问", status_code=status.HTTP_400_BAD_REQUEST)
 
-    # 计算当日收入和支出
-    income = Bill.objects.filter(
-        category__inOutType='1',  # 收入类型
-        date=f"{year}-{month}-{day}",
+    # 获取指定月份的天数
+    try:
+        start_date = datetime(int(year), int(month), 1)
+        if int(month) == 12:
+            end_date = datetime(int(year) + 1, 1, 1)
+        else:
+            end_date = datetime(int(year), int(month) + 1, 1)
+    except ValueError:
+        return fail_response(message="无效的日期格式", status_code=status.HTTP_400_BAD_REQUEST)
+
+    # 查询指定月份的收入和支出
+    bills = Bill.objects.filter(
+        date__gte=start_date,
+        date__lt=end_date,
         ledger_id=ledger_id,
         ledger__user=request.user
-    ).aggregate(total_income=Sum('amount'))['total_income'] or Decimal('0.0')
+    )
 
-    expense = Bill.objects.filter(
-        category__inOutType='2',  # 支出类型
-        date=f"{year}-{month}-{day}",
-        ledger_id=ledger_id,
-        ledger__user=request.user
-    ).aggregate(total_expense=Sum('amount'))['total_expense'] or Decimal('0.0')
+    # 按日期计算收入和支出
+    daily_summary = {}
+    for day in range(1, (end_date - start_date).days + 1):
+        daily_summary[day] = {"income": Decimal('0.0'), "expense": Decimal('0.0')}
 
-    # 保留两位小数，确保即使是整数形式也显示为两位小数
-    income = Decimal(income).quantize(Decimal('0.0'))
-    expense = Decimal(expense).quantize(Decimal('0.0'))
+    income_data = bills.filter(category__inOutType='1').values('date').annotate(total_income=Sum('amount'))
+    expense_data = bills.filter(category__inOutType='2').values('date').annotate(total_expense=Sum('amount'))
 
-    result = {"income": str(income), "expense": str(expense)}
+    for income in income_data:
+        day = income['date'].day
+        daily_summary[day]['income'] = Decimal(income['total_income']).quantize(Decimal('0.0'))
 
-    return success_response(data=result, message="获取日报表成功。")
+    for expense in expense_data:
+        day = expense['date'].day
+        daily_summary[day]['expense'] = Decimal(expense['total_expense']).quantize(Decimal('0.0'))
 
+    # 将结果转换为列表格式
+    result = [{"day": day, "income": str(data['income']), "expense": str(data['expense'])} for day, data in daily_summary.items()]
+
+    return success_response(data=result, message="获取月度报表成功。")
 
 @api_view(['GET'])
 def total_expense_by_category(request):

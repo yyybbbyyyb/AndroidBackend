@@ -42,6 +42,16 @@ class Category(models.Model):
 
     detail_type = models.CharField(max_length=2, verbose_name='详细类型')
 
+    def get_detail_type_display(self):
+        """根据 inOutType 和 detail_type 返回详细类型的显示名称"""
+        if self.inOutType == self.INCOME:
+            detail_type_dict = dict(self.DETAIL_TYPE_INCOME)
+        elif self.inOutType == self.EXPENSE:
+            detail_type_dict = dict(self.DETAIL_TYPE_EXPENSE)
+        else:
+            return "未知类型"
+        return detail_type_dict.get(self.detail_type, "未知类型")
+
     def clean(self):
         """根据 inOutType 验证 detail_type 的合法性"""
         if self.inOutType == self.INCOME and self.detail_type not in dict(self.DETAIL_TYPE_INCOME):

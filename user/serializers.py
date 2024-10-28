@@ -3,6 +3,7 @@ from lib2to3.fixes.fix_input import context
 from rest_framework import serializers
 from .models import User
 from django.utils import timezone
+from bill.models import Bill
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -24,6 +25,9 @@ class UserSerializer(serializers.ModelSerializer):
 
         # 计算用户使用天数
         representation['used_days'] = (timezone.now() - instance.date_joined).days
+
+        # 计算用户账单总数
+        representation['bill_count'] = Bill.objects.filter(ledger__user=instance).count()
 
         return representation
 

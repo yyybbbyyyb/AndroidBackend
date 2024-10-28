@@ -7,6 +7,8 @@ from .serializers import UserSerializer, UserRegisterSerializer
 from utils.utils import success_response, fail_response
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken
+from .models import User
 
 
 @api_view(['POST'])
@@ -26,6 +28,18 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)  # 调用父类方法
         data = response.data
+
+        # 解码 access token 以获取用户信息
+        access_token = data.get("access")
+        if access_token:
+            # 使用 AccessToken 解码 token
+            token = AccessToken(access_token)
+            user_id = token["user_id"]
+
+            user = User.objects.get(id=user_id)
+
+            data["user_id"] = user_id
+            data["user_name"] = user.username
 
         # 使用自定义的success_response格式返回
         return success_response(data=data, message="登录成功", status_code=status.HTTP_200_OK)
