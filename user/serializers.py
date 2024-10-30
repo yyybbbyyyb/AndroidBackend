@@ -18,9 +18,9 @@ class UserSerializer(serializers.ModelSerializer):
             avatar_url = self.context['request'].build_absolute_uri(instance.avatar.url)
         else:
             if instance.gender == 'M':
-                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_mail.png')
+                avatar_url = self.context['request'].build_absolute_uri('/staticfiles/avatar/default_ava_mail.png')
             else:
-                avatar_url = self.context['request'].build_absolute_uri('/static/avatar/default_ava_femail.png')
+                avatar_url = self.context['request'].build_absolute_uri('/staticfiles/avatar/default_ava_femail.png')
         representation['avatar'] = avatar_url
 
         # 计算用户使用天数

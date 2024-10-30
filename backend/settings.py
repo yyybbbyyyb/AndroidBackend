@@ -137,6 +137,8 @@ USE_TZ = True
 # 静态文件目录（包含默认头像）
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 
 # 媒体文件目录（用户上传头像）
 MEDIA_URL = '/media/'
