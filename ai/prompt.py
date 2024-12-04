@@ -37,7 +37,7 @@ def generate_bill_prompt(user_message):
         "detail_type": "详细类型对应的数字",
         "amount": "金额, 默认是0",
         "remark": "备注，10字以内",
-        "response": "作为我的AI记账助手，20字以内的回复",
+        "response": "作为我的朋友，20字以内的回复，可爱俏皮点",
         "emoji": "表情的数字，emoji中对应"
     }}
 

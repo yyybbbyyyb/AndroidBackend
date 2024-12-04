@@ -148,7 +148,13 @@ def budget_list(request):
     if request.method == 'GET':
         ledger_id = request.query_params.get('ledger')
 
+
         budgets = Budget.objects.filter(ledger__user=request.user, ledger_id=ledger_id)
+
+        # 过滤
+        filterset = BudgetFilter(request.GET, queryset=budgets)
+        budgets = filterset.qs
+
         serializer = BudgetSerializer(budgets, many=True)
         return success_response(data=serializer.data, message="获取预算列表成功")
 
